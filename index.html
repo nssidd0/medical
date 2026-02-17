@@ -2,130 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Heera Medical - Powered by NS SIDD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Demo</title>
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="shortcut icon" type="image/png" href="./logo.png">
+    <link rel="apple-touch-icon" href="./logo.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00796b">
+    <meta name="theme-color" content="#dc2626">
     <style>
-        body, html { margin:0; padding:0; height:100%; overflow:hidden; background-color: #f0f2f5; font-family: sans-serif; }
-        iframe { border:none; width:100%; height:100%; display: none; }
+        body, html { margin:0; padding:0; height:100%; overflow:hidden; background-color: #111827; }
+        iframe { border:none; width:100%; height:100%; }
         
-        #pwaInstallModal { 
-            position: fixed; inset: 0; z-index: 999999; 
-            background: #111827;
-            display: flex; align-items: center; justify-content: center; 
-            text-align: center; color: white;
+        /* CSS Animation for the Install Icon */
+        @keyframes bounce-arrow {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
         }
-
-        .box {
-            background: #ffffff; color: #333; padding: 30px;
-            border-radius: 25px; width: 85%; max-width: 350px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-
-        .install-btn {
-            width: 100%; background: #00796b; color: white;
-            padding: 16px; border: none; border-radius: 12px;
-            font-size: 18px; font-weight: bold; cursor: pointer;
-            margin-top: 15px;
-        }
-
-        .manual-inst {
-            display: none; background: #fff3cd; color: #856404;
-            padding: 15px; border-radius: 10px; font-size: 13px;
-            margin-top: 15px; border: 1px solid #ffeeba; text-align: left;
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
         }
     </style>
 </head>
 <body>
-
-    <iframe id="mainApp" src="https://script.google.com/macros/s/AKfycbyCMckc-onwbO1mQLh9qCRbun12DvPwQtJ7XY4xNsCNENwJFxg1gFzRAUt_OQNjvlXB/exec"></iframe>
-
-    <div id="pwaInstallModal">
-        <div class="box">
-            <div style="font-size: 50px;">🏥</div>
-            <h2 style="margin:10px 0;">Heera Medical</h2>
-            <p style="color: #666; font-size: 14px;">Please install the application to continue.</p>
-            
-            <button id="pwaInstallBtn" class="install-btn">INSTALL NOW</button>
-
-            <div id="manualInstructions" class="manual-inst">
-                <strong>Manual Install:</strong><br>
-                1. Click on Browser Menu (3 dots/Share)<br>
-                2. Select <b>'Install App'</b> or <b>'Add to Home Screen'</b>.
-            </div>
-            
-            <div style="margin-top:20px; font-size:11px; color:#aaa;">Managed by NS SIDD TUTORIAL</div>
-        </div>
-    </div>
-
+    <iframe src="https://script.google.com/macros/s/AKfycbwkSXbezhGZ_Zaf7LhlSC8AtJRqeCmNAKWvMTz7AS7-ckFdHrqJrjmzvHEkbeAEslocGg/exec" allowfullscreen></iframe>
+    
     <script>
-    const modal = document.getElementById('pwaInstallModal');
-    const iframe = document.getElementById('mainApp');
-    const manual = document.getElementById('manualInstructions');
-    let deferredPrompt;
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // 1. Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('SW Registered'))
+          .catch((err) => console.log('SW Error:', err));
+      }
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
-    }
+      // 2. iOS Detection
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // 1. ADVANCED DETECTION LOGIC
-    function isAppInstalled() {
-        // Method 1: Display Mode Check
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        
-        // Method 2: iOS Safari Specific Check
-        const isIOSInstalled = window.navigator.standalone === true;
-        
-        // Method 3: Document Referrer Check (Kuch browsers install hone pe ye bhejte hain)
-        const isReferrerPWA = document.referrer.includes('android-app://');
+      // 3. Popup HTML (With CSS Animation - No GIF)
+      const popupHTML = `
+        <div id="pwaInstallModal" style="display: none; position: fixed; inset: 0; z-index: 2147483647; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+            <div style="background-color: #111827; border: 1px solid #374151; padding: 30px 24px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); position: relative;">
+            
+                <div style="
+                    width: 70px; 
+                    height: 70px; 
+                    background: linear-gradient(135deg, #dc2626, #ef4444); 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    margin: 0 auto 20px auto; 
+                    animation: pulse-ring 2s infinite;
+                ">
+                    <span style="font-size: 32px; color: white; animation: bounce-arrow 2s infinite;">⬇️</span>
+                </div>
 
-        return isStandalone || isIOSInstalled || isReferrerPWA;
-    }
+                <h3 style="color: white; font-size: 22px; font-weight: 800; margin-bottom: 8px; font-family: system-ui, -apple-system, sans-serif;">Install App</h3>
+                <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px; font-family: system-ui, -apple-system, sans-serif; line-height: 1.5;">Get the full screen experience with faster access.</p>
 
-    function checkStatus() {
-        if (isAppInstalled()) {
-            modal.style.display = 'none';
-            iframe.style.display = 'block';
-            console.log("PWA Mode Detected: Dashboard Unlocked");
-        } else {
-            modal.style.display = 'flex';
-            iframe.style.display = 'none';
-        }
-    }
+                <button id="pwaInstallBtn" style="width: 100%; background: white; color: black; font-weight: 700; padding: 14px; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
+                    Install Now
+                </button>
+            </div>
+        </div>
+      `;
 
-    // 2. INSTALL PROMPT LOGIC
-    window.addEventListener('beforeinstallprompt', (e) => {
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+      // 4. Logic
+      let deferredPrompt;
+      const modal = document.getElementById('pwaInstallModal');
+      const installBtn = document.getElementById('pwaInstallBtn');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        console.log("Install prompt captured");
-    });
+        setTimeout(() => { modal.style.display = 'flex'; }, 3000);
+      });
 
-    document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+      installBtn.addEventListener('click', async () => {
+        // Simple Bounce Animation on Click
+        installBtn.style.transform = "scale(0.95)";
+        setTimeout(()=> installBtn.style.transform = "scale(1)", 150);
+
         if (deferredPrompt) {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                // Thoda wait karke check karo
-                setTimeout(checkStatus, 2000);
-            }
             deferredPrompt = null;
+            modal.style.display = 'none'; 
+        } else if (isIOS) {
+            alert("Tap Share Icon > Add to Home Screen");
+            modal.style.display = 'none';
         } else {
-            manual.style.display = 'block';
-            // Agar install hai fir bhi popup hai, toh hum 5 second baad button ko 'Open Dashboard' bana denge
-            document.getElementById('pwaInstallBtn').innerText = "ENTER DASHBOARD";
-            document.getElementById('pwaInstallBtn').onclick = function() {
-                modal.style.display = 'none';
-                iframe.style.display = 'block';
-            };
+            alert("App already installed.");
+            modal.style.display = 'none';
         }
-    });
+      });
+        // ==========================================
+      // 5. OFFLINE / NO INTERNET DETECTION
+      // ==========================================
+      
+      // HTML for Offline Message
+      const offlineHTML = `
+        <div id="offlineModal" style="display: none; position: fixed; inset: 0; z-index: 2147483648; background-color: #111827; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 20px;">📡</div>
+            <h2 style="color: white; font-family: sans-serif; margin-bottom: 10px;">No Internet</h2>
+            <p style="color: #9ca3af; font-family: sans-serif;">Please check your connection.</p>
+            <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold;">Try Again</button>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', offlineHTML);
 
-    // Run check immediately and then every second
-    checkStatus();
-    setInterval(checkStatus, 1500);
-</script>
+      function updateOnlineStatus() {
+        const offlineModal = document.getElementById('offlineModal');
+        if (navigator.onLine) {
+            offlineModal.style.display = 'none';
+        } else {
+            offlineModal.style.display = 'flex';
+        }
+      }
+
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      
+      // Check on load
+      updateOnlineStatus();
+    });
+    </script>
 </body>
 </html>
-
 
