@@ -60,46 +60,72 @@
     </div>
 
     <script>
-        const modal = document.getElementById('pwaInstallModal');
-        const iframe = document.getElementById('mainApp');
-        const manual = document.getElementById('manualInstructions');
-        let deferredPrompt;
+    const modal = document.getElementById('pwaInstallModal');
+    const iframe = document.getElementById('mainApp');
+    const manual = document.getElementById('manualInstructions');
+    let deferredPrompt;
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+    }
+
+    // 1. ADVANCED DETECTION LOGIC
+    function isAppInstalled() {
+        // Method 1: Display Mode Check
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Method 2: iOS Safari Specific Check
+        const isIOSInstalled = window.navigator.standalone === true;
+        
+        // Method 3: Document Referrer Check (Kuch browsers install hone pe ye bhejte hain)
+        const isReferrerPWA = document.referrer.includes('android-app://');
+
+        return isStandalone || isIOSInstalled || isReferrerPWA;
+    }
+
+    function checkStatus() {
+        if (isAppInstalled()) {
+            modal.style.display = 'none';
+            iframe.style.display = 'block';
+            console.log("PWA Mode Detected: Dashboard Unlocked");
+        } else {
+            modal.style.display = 'flex';
+            iframe.style.display = 'none';
         }
+    }
 
-        // Hard Lock Logic
-        function checkStatus() {
-            const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            if (isPWA) {
+    // 2. INSTALL PROMPT LOGIC
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log("Install prompt captured");
+    });
+
+    document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                // Thoda wait karke check karo
+                setTimeout(checkStatus, 2000);
+            }
+            deferredPrompt = null;
+        } else {
+            manual.style.display = 'block';
+            // Agar install hai fir bhi popup hai, toh hum 5 second baad button ko 'Open Dashboard' bana denge
+            document.getElementById('pwaInstallBtn').innerText = "ENTER DASHBOARD";
+            document.getElementById('pwaInstallBtn').onclick = function() {
                 modal.style.display = 'none';
                 iframe.style.display = 'block';
-            } else {
-                modal.style.display = 'flex';
-                iframe.style.display = 'none';
-            }
+            };
         }
+    });
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            } else {
-                // Alert ke bajaye box dikhao
-                manual.style.display = 'block';
-            }
-        });
-
-        setInterval(checkStatus, 1000);
-        checkStatus();
-    </script>
+    // Run check immediately and then every second
+    checkStatus();
+    setInterval(checkStatus, 1500);
+</script>
 </body>
 </html>
+
 
