@@ -1,16 +1,14 @@
-const CACHE_NAME = 'ns-sidd-v1';
-const urlsToCache = [ './index.html', './manifest.json' ];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+self.addEventListener('install', (e) => {
+  // Yahan maine 'v2' kar diya hai
+  e.waitUntil(
+    caches.open('medical-v2').then((cache) => cache.addAll([
+      './index.html',
+    ])),
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => response || fetch(e.request)),
   );
 });
