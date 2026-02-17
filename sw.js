@@ -23,6 +23,10 @@ self.addEventListener('install', (event) => {
   );
 });
 
+self.addEventListener('fetch', function(event) {
+  // Service worker is required for PWA installation
+});
+
 // 2. Fetch Event: Offline ya slow network pe cached files dikhana
 self.addEventListener('fetch', (event) => {
   event.respondWith(
@@ -48,4 +52,5 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+
 });
