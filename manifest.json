@@ -1,6 +1,6 @@
 {
-  "name": "NS SIDD TUTORIAL",
-  "short_name": "NS SIDD",
+  "name": "MEDICAL DEMO",
+  "short_name": "SIR G",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#111827",
