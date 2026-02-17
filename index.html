@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heera Medical - Managed by NS SIDD TUTORIAL</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00a884">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Iframe Control */
+        iframe {
+            width: 100%;
+            height: calc(100% - 40px); /* Space for branding footer */
+            border: none;
+        }
+
+        /* Fixed Branding Footer - Aapka Control */
+        .admin-footer {
+            height: 40px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .admin-footer b { color: #00a884; }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <img src="https://i.gifer.com/ZZ5H.gif" width="50"><br>
+        <p>Heera Medical System Loading...</p>
+    </div>
+
+    <iframe 
+        src="https://script.google.com/macros/s/AKfycbyCMckc-onwbO1mQLh9qCRbun12DvPwQtJ7XY4xNsCNENwJFxg1gFzRAUt_OQNjvlXB/exec" 
+        onload="document.getElementById('loader').style.display='none';">
+    </iframe>
+
+    <div class="admin-footer">
+        <div>System Provider: <b>NS SIDD TUTORIAL</b></div>
+        <div>Support: +91 9082009795</div>
+    </div>
+
+    <script>
+        // Service Worker Register for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log('Service Worker Registered');
+            });
+        }
+    </script>
+</body>
+</html>
