@@ -2,80 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heera Medical - Managed by NS SIDD TUTORIAL</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Heera Medical - Powered by NS SIDD</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00a884">
-
+    <meta name="theme-color" content="#00796b">
+    
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
+        body, html { margin:0; padding:0; height:100%; overflow:hidden; background-color: #f0f2f5; font-family: sans-serif; }
+        iframe { border:none; width:100%; height:100%; display: block; }
+        
+        /* RIGID LOCK POPUP */
+        #pwaInstallModal { 
+            position: fixed; inset: 0; z-index: 999999; 
+            background: linear-gradient(180deg, #004d40 0%, #000000 100%);
+            display: none; align-items: center; justify-content: center; 
+            text-align: center; color: white;
         }
 
-        /* Iframe Control */
-        iframe {
-            width: 100%;
-            height: calc(100% - 40px); /* Space for branding footer */
-            border: none;
+        .box {
+            background: #ffffff; color: #333; padding: 40px 25px;
+            border-radius: 30px; width: 85%; max-width: 350px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* Fixed Branding Footer - Aapka Control */
-        .admin-footer {
-            height: 40px;
-            background: #2c3e50;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            font-size: 14px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            z-index: 1000;
+        .icon-circle {
+            width: 80px; height: 80px; background: #00796b;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 20px;
+            font-size: 40px; color: white;
+            box-shadow: 0 10px 20px rgba(0,121,107,0.3);
         }
 
-        .admin-footer b { color: #00a884; }
-
-        /* Loader */
-        #loader {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+        .install-btn {
+            width: 100%; background: #00796b; color: white;
+            padding: 16px; border: none; border-radius: 15px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            margin-top: 20px; transition: 0.3s;
         }
+
+        .brand-text { font-size: 12px; color: #888; margin-top: 25px; }
+        .brand-text b { color: #00796b; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <img src="https://i.gifer.com/ZZ5H.gif" width="50"><br>
-        <p>Heera Medical System Loading...</p>
-    </div>
+    <iframe id="mainApp" src="https://script.google.com/macros/s/AKfycbwkSXbezhGZ_Zaf7LhlSC8AtJRqeCmNAKWvMTz7AS7-ckFdHrqJrjmzvHEkbeAEslocGg/exec"></iframe>
 
-    <iframe 
-        src="https://script.google.com/macros/s/AKfycbyCMckc-onwbO1mQLh9qCRbun12DvPwQtJ7XY4xNsCNENwJFxg1gFzRAUt_OQNjvlXB/exec" 
-        onload="document.getElementById('loader').style.display='none';">
-    </iframe>
-
-    <div class="admin-footer">
-        <div>System Provider: <b>NS SIDD TUTORIAL</b></div>
-        <div>Support: +91 9082009795</div>
+    <div id="pwaInstallModal">
+        <div class="box">
+            <div class="icon-circle">🏥</div>
+            <h2 style="margin:0; font-size: 24px;">Heera Medical</h2>
+            <p style="color: #666; margin: 15px 0;">Is system ko use karne ke liye App install karna zaroori hai.</p>
+            
+            <button id="pwaInstallBtn" class="install-btn">INSTALL APP</button>
+            
+            <div class="brand-text">
+                Developed by <br> <b>NS SIDD TUTORIAL</b>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Service Worker Register for PWA
+        const modal = document.getElementById('pwaInstallModal');
+        const iframe = document.getElementById('mainApp');
+        let deferredPrompt;
+
+        // 1. SERVICE WORKER REGISTRATION
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => {
-                console.log('Service Worker Registered');
-            });
+            navigator.serviceWorker.register('./sw.js');
         }
+
+        // 2. CHECK IF ALREADY INSTALLED (HARD LOCK)
+        function checkStatus() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isPWA) {
+                modal.style.display = 'none';
+                iframe.style.display = 'block';
+            } else {
+                modal.style.display = 'flex';
+                iframe.style.display = 'none';
+            }
+        }
+
+        // 3. INSTALL LOGIC
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    // Modal automatically checkStatus se hat jayega jab app open hogi
+                }
+                deferredPrompt = null;
+            } else {
+                // Agar automatic prompt nahi aa raha (iOS ya generic)
+                alert("Installation Method:\n1. Chrome: Menu (3 dots) > Install App\n2. iPhone: Share > Add to Home Screen");
+            }
+        });
+
+        // Loop check: Takki jaise hi install ho, system update ho jaye
+        setInterval(checkStatus, 1000);
+        checkStatus();
     </script>
 </body>
 </html>
